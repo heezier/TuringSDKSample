@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_base_bottom"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="5dp"
+    android:orientation="horizontal"
+    android:paddingRight="10dp">
+
+    <RelativeLayout
+        android:id="@+id/rel_input"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_weight="6"
+        android:visibility="visible">
+
+        <Button
+            android:id="@+id/btn_select_asr"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:background="@mipmap/btn_to_voice" />
+
+        <EditText
+            android:id="@+id/ed_input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="70dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/btn_select_asr"
+            android:background="@drawable/edit_input_bg"
+            android:paddingLeft="5dp" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/selector_send_bg"
+            android:text="@string/chat_send" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rel_asr"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_weight="6"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btn_select_input"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:background="@mipmap/btn_to_input" />
+
+        <Button
+            android:id="@+id/btn_start_asr"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/btn_select_input"
+            android:background="@drawable/selector_send_bg"
+            android:textColor="@android:color/white"
+            android:text="@string/click_chat_start" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rel_setting"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="4"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_tts_setting"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:background="@mipmap/btn_tts_setting" />
+    </RelativeLayout>
+</LinearLayout>

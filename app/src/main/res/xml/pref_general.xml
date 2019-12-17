@@ -1,0 +1,201 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <PreferenceCategory
+        android:title="动态检测"
+        android:key="pre_key_motion_settings">
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="30"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_min_thread"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="30"
+            android:title="最小线程数" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_max_thread"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="100"
+            android:title="最大线程数" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="33"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_crop_rate"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="33"
+            android:title="crop rate" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="8"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_fps"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="8"
+            android:title="fps" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_dst_height"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="100"
+            android:title="DSt高度" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_server_wait_time"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="0"
+            android:title="服务器等待时间" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_min_thread_wait_time"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="100"
+            android:title="最新线程等待时间" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="@string/pre_key_motion_timer"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="100"
+            android:title="timer" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="相机相关"
+        android:key="pre_key_camera_settings">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/pref_list_titles_select_camera"
+            android:entryValues="@array/pref_list_values_select_camera"
+            android:key="@string/pre_key_camera_list"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:summary="前置"
+            android:title="摄像头" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/default_camera_height"
+            android:inputType="number"
+            android:key="@string/pre_key_camera_height"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/default_camera_height"
+            android:title="相机高度" />
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/default_camera_angle"
+            android:inputType="number"
+            android:key="@string/pre_key_camera_angle"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/default_camera_angle"
+            android:title="相机角度" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/default_camera_fl"
+            android:inputType="numberDecimal"
+            android:key="@string/pre_key_camera_fl"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/default_camera_fl"
+            android:title="FL值" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/default_book_height"
+            android:inputType="numberDecimal"
+            android:key="@string/pre_key_book_height"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/default_book_height"
+            android:title="绘本高度" />
+        <!-- <EditTextPreference
+             android:capitalize="words"
+             android:defaultValue="@string/default_camera_turnpage_max_threashold"
+             android:inputType="number"
+             android:key="@string/pre_key_camera_turnpage_max_threshold"
+             android:maxLines="1"
+             android:selectAllOnFocus="true"
+             android:singleLine="true"
+             android:summary="@string/default_camera_turnpage_max_threashold"
+             android:title="翻页检测最高阈值" />
+         <EditTextPreference
+             android:capitalize="words"
+             android:defaultValue="@string/default_camera_turnpage_min_threashold"
+             android:inputType="number"
+             android:key="@string/pre_key_camera_turnpage_min_threshold"
+             android:maxLines="1"
+             android:selectAllOnFocus="true"
+             android:singleLine="true"
+             android:summary="@string/default_camera_turnpage_min_threashold"
+             android:title="翻页检测最低阈值" />-->
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="模式相关"
+        android:key="pre_key_detect_mode">
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pre_list_titles_mode_ocr"
+            android:entryValues="@array/pre_list_values_mode_ocr"
+            android:key="@string/pre_key_mode_ocr"
+            android:summary="0"
+            android:title="OCR模式" />
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pre_list_titles_mode_finger"
+            android:entryValues="@array/pre_list_values_mode_finger"
+            android:key="@string/pre_key_mode_finger"
+            android:summary="0"
+            android:title="Finger模式" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="界面相关"
+        android:key="pre_key_ui_settings">
+        <!--        <SwitchPreference
+                    android:visibility="gone"
+                    android:defaultValue="false"
+                    android:key="@string/pre_key_ui_log"
+                    android:summaryOn="@string/tip_turn_on"
+                    android:summaryOff="@string/tip_turn_off"
+                    android:title="界面日志开关" />-->
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/pre_key_ui_preview"
+            android:summaryOn="@string/tip_turn_on"
+            android:summaryOff="@string/tip_turn_off"
+            android:title="预览图显示开关" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
+

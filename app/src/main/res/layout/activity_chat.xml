@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/colorBg"
+    tools:context=".ai.chat.ChatActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.turing.sample.view.BottomLayout
+                android:id="@+id/base_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/base_bottom"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:id="@+id/tv_results_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/results"/>
+               <androidx.recyclerview.widget.RecyclerView
+                   android:id="@+id/result_recycleview"
+                   android:layout_width="match_parent"
+                   android:layout_height="200dp">
+
+               </androidx.recyclerview.widget.RecyclerView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chat"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/msg_recycleview"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+     <TextView
+         android:id="@+id/tv_timer"
+         android:layout_width="60dp"
+         android:layout_height="60dp"
+         android:textColor="@android:color/white"
+         android:background="@drawable/bg_timer"
+         android:textSize="14sp"
+         android:gravity="center"
+         android:layout_gravity="center"
+         android:text="5s"/>
+
+    </FrameLayout>
+
+
+
+</LinearLayout>

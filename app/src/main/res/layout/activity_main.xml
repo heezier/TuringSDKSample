@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    tools:context=".app.MainActivity"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tv_initState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/welecome"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center_vertical"
+        android:text="@string/select_server">
+
+    </TextView>
+    <Spinner
+        android:id="@+id/spinner_server"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:entries="@array/server_values" />
+
+    <TextView
+        android:id="@+id/tv_deviceID"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text=" "
+        />
+
+    <Button
+        android:id="@+id/btn_chat"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="@string/Chat"
+        android:enabled="false"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btn_tts"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="@string/TTS"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btn_asr"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="@string/ASR"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btn_nlp"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="@string/NLP"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btn_book"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="@string/Book"
+        android:layout_marginTop="20dp"/>
+
+</LinearLayout>

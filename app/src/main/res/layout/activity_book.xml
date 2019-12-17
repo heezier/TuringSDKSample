@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/btn_reset_cover"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/reset_bookid"
+            android:layout_marginRight="2dp"
+            style="@style/Button">
+        </Button>
+
+        <Button
+            android:id="@+id/btn_setting"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/setting"
+            android:layout_marginLeft="2dp"
+            style="@style/Button">
+        </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_imgview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/tv_camera_hint"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginRight="8dp"
+                android:gravity="center"
+                android:text="@string/camera_preview"></TextView>
+
+            <FrameLayout
+                android:id="@+id/frame_layer"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginRight="8dp"></FrameLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/tv_img_result_hint"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="8dp"
+                android:gravity="center"
+                android:text="@string/detection"></TextView>
+            <ImageView
+                android:id="@+id/iv_image_result"
+                android:layout_width="match_parent"
+                android:layout_height="160dp">
+            </ImageView>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom"
+        android:layout_below="@+id/ll_imgview"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/cover"
+                android:textColor="@android:color/holo_red_dark"></TextView>
+
+            <TextView
+                android:id="@+id/tv_results_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/holo_red_dark"></TextView>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/result_recycleview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

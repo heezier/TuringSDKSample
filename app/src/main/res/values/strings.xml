@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_name">TuringSDKSample</string>
+
+    <string name="welecome">欢迎使用图灵机器人！</string>
+    <string name="Chat">智能聊天</string>
+    <string name="ASR">ASR</string>
+    <string name="TTS">TTS</string>
+    <string name="NLP">语义</string>
+    <string name="Book">绘本识别</string>
+    <string name="select_server">选择环境</string>
+    <string-array name="server_values">
+        <item>alpha</item>
+        <item>beta</item>
+        <item>正式</item>
+    </string-array>
+
+
+
+    <string name="results">请求结果</string>
+    <string name="start">开始</string>
+    <string name="stop">停止</string>
+    <string name="start_play">播放</string>
+    <string name="chat">对话结果</string>
+
+
+    <string name="asr_withrecord">内置录音</string>
+    <string name="asr_streaming_pcm">PCM流输入</string>
+    <string name="asr_streaming_opus">OPUS流输入</string>
+
+    <string name="chat_send">发送</string>
+    <string name="click_chat_start">按住讲话</string>
+    <string name="click_chat_stop">点按停止</string>
+    <string name="warn_content_isnull">输入内容不能为空</string>
+
+    <string name="nlp_start">请求语义</string>
+    <string name="tts_start">请求TTS</string>
+    <string name="nlp_semantic_greet">打招呼</string>
+    <string name="nlp_semantic_active">主动交互</string>
+    <string name="edittext_hint">北京今天天气怎么样?</string>
+    <string name="custom_explanation">以下为用户自定义参数，注意code个数需要等于自定义参数个数</string>
+    <string name="et_hint_semantic_robot_id">请输入应用Code，格式为 value;value;...，选填</string>
+    <string name="et_hint_semantic_robot_data">请输入code对应自定义参数，格式为 key:value;...|key:value;...|...，选填</string>
+    <string name="et_hint_semantic_request_extra_codes">输入本次交互使用技能code，格式为 value;value;...，选填</string>
+
+    <string name="camera_preview">相机预览</string>
+    <string name="detection">检测结果</string>
+    <string name="setting">设置参数</string>
+    <string name="cover">识别封面</string>
+    <string name="page">识别内页</string>
+    <string name="reset_bookid">重置封面</string>
+
+
+    <string name="default_camera_height">180</string>
+    <string name="default_server">demo</string>
+    <string name="default_camera_angle">35</string>
+    <string name="pre_key_camera_height">pre_key_camera_height</string>
+    <!--书本高度-->
+    <string name="pre_key_book_height">pre_key_book_height</string>
+    <string name="default_book_height">250</string>z
+    <!--相机相关配置-->
+    <string-array name="pref_list_titles_select_camera">
+        <item>前置</item>
+        <item>后置</item>
+    </string-array>
+    <string-array name="pref_list_values_select_camera">
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+
+    <string name="pre_key_camera_angle">pre_key_camera_angle</string>
+    <string name="pre_key_camera_fl">pre_key_camera_fl</string>
+    <string name="default_camera_fl">280</string>
+
+    <string name="pre_key_camera_turnpage_max_threshold">pre_key_camera_turnpage_max_threshold</string>
+    <string name="default_camera_turnpage_max_threashold">25</string>
+    <string name="pre_key_camera_turnpage_min_threshold">pre_key_camera_turnpage_min_threshold</string>
+    <string name="default_camera_turnpage_min_threashold">10</string>
+
+    <string name="pre_key_server_list">server_list</string>
+    <string name="pre_key_camera_list">pre_key_camera_list</string>
+    <!--界面显示日志设置-->
+    <string name="pre_key_ui_log">pre_key_ui_log</string>
+    <string name="tip_turn_on">开启</string>
+    <string name="tip_turn_off">关闭</string>
+    <!--是否有预览图片-->
+    <string name="pre_key_ui_preview">pre_key_ui_preview</string>
+
+    <!--动态检测相关-->
+    <string name="pre_key_motion_min_thread">pre_key_motion_min_thread</string>
+    <string name="pre_key_motion_max_thread">pre_key_motion_max_thread</string>
+    <string name="pre_key_motion_min_thread_wait_time">pre_key_motion_min_thread_wait_time</string>
+    <string name="pre_key_motion_fps">pre_key_motion_fps</string>
+    <string name="pre_key_motion_dst_height">pre_key_motion_dst_height</string>
+    <string name="pre_key_motion_timer">pre_key_motion_timer</string>
+    <string name="pre_key_motion_crop_rate">pre_key_motion_crop_rate</string>
+    <string name="pre_key_motion_server_wait_time">pre_key_motion_server_wait_time</string>
+    <!--模式相关-->
+    <string name="pre_key_mode_ocr">pre_key_mode_ocr</string>
+    <string-array name="pre_list_titles_mode_ocr">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pre_list_values_mode_ocr">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string name="pre_key_mode_finger">pre_key_mode_finger</string>
+    <string-array name="pre_list_titles_mode_finger">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pre_list_values_mode_finger">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+
+
+
+</resources>
