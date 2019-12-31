@@ -7,6 +7,8 @@
     <string name="TTS">TTS</string>
     <string name="NLP">语义</string>
     <string name="Book">绘本识别</string>
+    <string name="Ea">口语评测</string>
+
     <string name="select_server">选择环境</string>
     <string-array name="server_values">
         <item>alpha</item>
@@ -44,11 +46,15 @@
 
     <string name="camera_preview">相机预览</string>
     <string name="detection">检测结果</string>
-    <string name="setting">设置参数</string>
+    <string name="setting">设置</string>
+    <string name="qa">问答</string>
     <string name="cover">识别封面</string>
     <string name="page">识别内页</string>
     <string name="reset_bookid">重置封面</string>
 
+
+    <string name="ea_hint">输入单词</string>
+    <string name="Recording">录音中</string>
 
     <string name="default_camera_height">180</string>
     <string name="default_server">demo</string>

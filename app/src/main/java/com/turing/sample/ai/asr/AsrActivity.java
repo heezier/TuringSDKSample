@@ -1,5 +1,6 @@
 package com.turing.sample.ai.asr;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -7,6 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.turing.opus.OpusEncoder;
 import com.turing.opus.OpusHelper;
@@ -15,11 +18,16 @@ import com.turing.os.client.TuringOSClientAsrListener;
 import com.turing.os.init.UserData;
 import com.turing.os.request.bean.AsrRequestConfig;
 import com.turing.os.request.bean.ResponBean;
+import com.turing.os.voiceprocessor.codec.BytesTransform;
 import com.turing.sample.R;
+import com.turing.sample.ai.chat.ResultAdapter;
+import com.turing.sample.app.JsonViewActivity;
 import com.turing.sample.app.base.BaseActivity;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,8 +51,6 @@ public class AsrActivity extends BaseActivity {
 
     @BindView(R.id.tv_results_hint)
     TextView tvResultsHint;
-    @BindView(R.id.tv_results)
-    TextView tvResults;
     @BindView(R.id.btn_code_start)
     Button btnCodeStart;
 
@@ -57,7 +63,13 @@ public class AsrActivity extends BaseActivity {
     Button btnStopPcm;
     @BindView(R.id.btn_stop_opus)
     Button btnStopOpus;
+    @BindView(R.id.result_recycleview)
+    RecyclerView resultRecycleview;
+    @BindView(R.id.tv_result)
+    TextView tvResult;
 
+    private List<AsrResult> resultList = new ArrayList<>();
+    private AsrResultAdapter resultAdapter;
 
     private volatile boolean isPcmStop = false;
     private volatile boolean isEncodeStop = false;
@@ -74,6 +86,23 @@ public class AsrActivity extends BaseActivity {
         ButterKnife.bind(this);
         userData = (UserData) getIntent().getSerializableExtra("userdata");
         updateUI(MODE_NONE);
+        initResultView();
+    }
+
+    private void initResultView() {
+        resultRecycleview = (RecyclerView) findViewById(R.id.result_recycleview);
+        LinearLayoutManager resultlayoutManager = new LinearLayoutManager(this);
+        resultRecycleview.setLayoutManager(resultlayoutManager);
+        resultAdapter = new AsrResultAdapter(resultList);
+        resultRecycleview.setAdapter(resultAdapter);
+        resultAdapter.setOnItemClickListener(new AsrResultAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Intent intent = new Intent(mContext, JsonViewActivity.class);
+                intent.putExtra("json", resultList.get(position).getResult());
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     private void startEncodeStream() {
@@ -81,6 +110,7 @@ public class AsrActivity extends BaseActivity {
         builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
         //必须与传入可支持的格式对应，比如你将要传入opus格式，则该参数必须设置为OPUS
         builder.asrFormatEnum(AsrRequestConfig.OPUS);
+        builder.asrSrcFormatEnum(AsrRequestConfig.OPUS);
         builder.asrRateEnum(AsrRequestConfig.RATE_16000);
         builder.enablePunctuation(false);
         builder.maxEndSilence(3000);
@@ -91,7 +121,7 @@ public class AsrActivity extends BaseActivity {
 
         AsrRequestConfig asrRequestConfig = builder.build();
         turingOSClient = TuringOSClient.getInstance(this, userData);
-        turingOSClient.initAsrEncodeStream(asrRequestConfig, new TuringOSClientAsrListener() {
+        turingOSClient.initAsrStream(asrRequestConfig, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
@@ -100,6 +130,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onStop() {
+                Log.e(TAG, "===========onStop========");
                 isEncodeStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
@@ -122,7 +153,7 @@ public class AsrActivity extends BaseActivity {
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
-                        tvResults.setText("code:" + code + "result: " + result);
+                        updateResult(code, result, responBean);
                     }
                 });
             }
@@ -134,6 +165,8 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
+                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
+                isEncodeStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -148,8 +181,8 @@ public class AsrActivity extends BaseActivity {
     private void startPCMStream() {
         AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
         builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
-        //默认是OPUS，这里传入pcm数据，会经过opus编码再请求，如果设置PCM，则不会编码,而是直接请求
         builder.asrFormatEnum(AsrRequestConfig.PCM);
+        builder.asrSrcFormatEnum(AsrRequestConfig.PCM);
         builder.asrRateEnum(AsrRequestConfig.RATE_16000);
         builder.enablePunctuation(false);
         builder.intermediateResult(true);
@@ -158,11 +191,11 @@ public class AsrActivity extends BaseActivity {
          * CHANNEL_IN_MONO或者CHANNEL_IN_STEREO
          */
         builder.channel(AsrRequestConfig.CHANNEL_IN_MONO);
-        builder.enableVoiceDetection(true);
+        builder.enableVoiceDetection(false);
 
         AsrRequestConfig asrRequestConfig = builder.build();
         turingOSClient = TuringOSClient.getInstance(this, userData);
-        turingOSClient.initAsrPcmStream(asrRequestConfig, new TuringOSClientAsrListener() {
+        turingOSClient.initAsrStream(asrRequestConfig, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
@@ -171,6 +204,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onStop() {
+                Log.e(TAG, "onStop");
                 isPcmStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
@@ -192,7 +226,7 @@ public class AsrActivity extends BaseActivity {
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
-                        tvResults.setText("code:" + code + "result: " + result);
+                        updateResult(code, result, responBean);
                     }
                 });
 
@@ -200,15 +234,13 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onTimer(int second) {
-                if (second <= 0) {
-                    if (turingOSClient != null) {
-                        turingOSClient.stopAsr();
-                    }
-                }
+
             }
 
             @Override
             public void onError(int code, String msg) {
+                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
+                isPcmStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -224,7 +256,7 @@ public class AsrActivity extends BaseActivity {
     private void startInnerRecord() {
 
         turingOSClient = TuringOSClient.getInstance(this, userData);
-        turingOSClient.startAsrWithRecorder(new TuringOSClientAsrListener() {
+        turingOSClient.startAsrWithRecorder(true, new TuringOSClientAsrListener() {
             @Override
             public void onRecorderStart() {
                 mUIHandler.postRunnable(new Runnable() {
@@ -238,6 +270,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onStop() {
+                Log.e(TAG, "onStop");
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -256,7 +289,7 @@ public class AsrActivity extends BaseActivity {
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
-                        tvResults.setText("code:" + code + "result: " + result);
+                        updateResult(code, result, responBean);
                     }
                 });
 
@@ -269,6 +302,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
+                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -317,8 +351,7 @@ public class AsrActivity extends BaseActivity {
                 btnCodeStart.setEnabled(true);
                 btnStopOpus.setEnabled(false);
                 btnStopPcm.setEnabled(false);
-                isEncodeStop = false;
-                isPcmStop = false;
+
                 break;
         }
     }
@@ -341,13 +374,13 @@ public class AsrActivity extends BaseActivity {
                 break;
             case R.id.btn_stop_pcm:
                 isPcmStop = true;
-                if(turingOSClient != null){
+                if (turingOSClient != null) {
                     turingOSClient.stopAsr();
                 }
                 break;
             case R.id.btn_stop_opus:
                 isEncodeStop = true;
-                if(turingOSClient != null){
+                if (turingOSClient != null) {
                     turingOSClient.stopAsr();
                 }
                 break;
@@ -367,11 +400,11 @@ public class AsrActivity extends BaseActivity {
                         break;
                     }
                     if (length == 320) {
-                        turingOSClient.sendPcmData(buffer);
+                        turingOSClient.sendAudio(buffer, length);
                     } else {
-                        turingOSClient.sendPcmData(Arrays.copyOf(buffer, length));
+                        turingOSClient.sendAudio(Arrays.copyOf(buffer, length), length);
                     }
-                    Thread.sleep(20);
+                    Thread.sleep(100);
                 }
                 Log.i(TAG, "testFile: 流输入完成");
             } catch (Exception e) {
@@ -395,7 +428,7 @@ public class AsrActivity extends BaseActivity {
                 Log.v(TAG, "opusEncoder初始化失败");
             }
             try {
-                InputStream inputStream = getAssets().open("record_.pcm");
+                InputStream inputStream = getAssets().open("weather.pcm");
                 byte[] buffer = new byte[OpusHelper.getByteSizePerFrame(FRAME_SIZE, CHANNELS)];
                 int bufferSize = OpusHelper.getByteSizePerFrame(FRAME_SIZE, CHANNELS);
                 Log.e(TAG, FRAME_SIZE + "length" + bufferSize);
@@ -405,20 +438,39 @@ public class AsrActivity extends BaseActivity {
                         turingOSClient.stopAsr();
                         break;
                     }
-                    if (length == bufferSize) {
-                        byte[] enBytes = opusEncoder.encodeBytes(buffer, FRAME_SIZE);
-                        Log.i(TAG, "testFile: encodeLen=" + enBytes.length);
-                        turingOSClient.sendEncodeData(enBytes, AsrRequestConfig.OPUS);
-                    } else {
-                        byte[] enBytes = opusEncoder.encodeBytes(buffer, FRAME_SIZE);
-                        turingOSClient.sendEncodeData(Arrays.copyOf(enBytes, enBytes.length), AsrRequestConfig.OPUS);
-                    }
+                    byte[] enBytes = opusEncoder.encodeBytes(buffer, FRAME_SIZE);
+                    byte[] opusBytes = BytesTransform.opensocketOpusAdapt(enBytes);
+                    Log.i(TAG, "testFile: encodeLen=" + enBytes.length);
+                    turingOSClient.sendAudio(opusBytes, opusBytes.length);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     };
+
+    private void updateResult(int code, String result, ResponBean responBean) {
+        if (code == 200) {
+            if (responBean != null && responBean.getAsrResponse() != null) {
+                if (responBean.getAsrResponse().getState() == 210) {
+                    String asrResult = responBean.getAsrResponse().getValue();
+                    tvResult.setText(asrResult);
+                } else if (responBean.getAsrResponse().getState() == 200) {
+                    String asrResult = responBean.getAsrResponse().getValue();
+                    AsrResult asrResult1Bean = new AsrResult(result, asrResult);
+                    resultList.add(asrResult1Bean);
+                    resultAdapter.updateList(resultList);
+                    resultRecycleview.smoothScrollToPosition(resultList.size() - 1);
+                }
+            }
+        } else {
+            AsrResult asrResult1Bean = new AsrResult(result, result);
+            resultList.add(asrResult1Bean);
+            resultAdapter.updateList(resultList);
+            resultRecycleview.smoothScrollToPosition(resultList.size() - 1);
+        }
+
+    }
 
     private void startStreamEncodeInput() {
         new Thread(encodeRun).start();

@@ -12,7 +12,10 @@ import com.turing.sample.R;
 
 import java.util.List;
 
-
+/**
+ * @Author yihuapeng
+ * @Date 2019/12/2 20:06
+ **/
 public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.ViewHolder> {
 
     private List<Msg> msgList;

@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/bottom"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true">
         <Button
@@ -22,6 +22,14 @@
             style="@style/Button">
         </Button>
 
+        <Button
+            android:id="@+id/btn_qa"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/qa"
+            android:layout_marginLeft="2dp"
+            style="@style/Button">
+        </Button>
         <Button
             android:id="@+id/btn_setting"
             android:layout_width="0dp"

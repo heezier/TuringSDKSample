@@ -29,13 +29,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--图灵申请的AppKey和Secert-->
-        <meta-data
-            android:name="TURING_APPKEY"
-            android:value="替换图灵授权的apikey" />
-        <meta-data
-            android:name="TURING_SECRET"
-            android:value="替换图灵授权的secert" />
 
         <activity android:name=".app.StartActivity">
             <intent-filter>
@@ -67,6 +60,10 @@
             android:screenOrientation="portrait"></activity>
 
         <activity android:name=".app.JsonViewActivity"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:screenOrientation="portrait"></activity>
+
+        <activity android:name=".ai.Ea.EaActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:screenOrientation="portrait"></activity>
     </application>

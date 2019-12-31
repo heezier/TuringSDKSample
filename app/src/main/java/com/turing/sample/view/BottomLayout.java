@@ -16,7 +16,9 @@ import android.widget.Toast;
 import com.turing.sample.R;
 
 
-
+/**
+ * @author：licheng@uzoo.com
+ */
 
 public class BottomLayout extends LinearLayout implements View.OnClickListener {
 

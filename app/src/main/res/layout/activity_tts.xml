@@ -52,14 +52,8 @@
         android:layout_height="wrap_content"
         android:text="@string/results"
         android:layout_marginTop="20dp"/>
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/result_recycleview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="20dp">
-        <TextView
-            android:id="@+id/tv_result"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/black"/>
-    </ScrollView>
+        android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

@@ -18,6 +18,7 @@ import com.turing.os.init.SdkInitializerListener;
 import com.turing.os.init.UserData;
 import com.turing.os.util.SPUtils;
 import com.turing.sample.R;
+import com.turing.sample.ai.Ea.EaActivity;
 import com.turing.sample.ai.asr.AsrActivity;
 import com.turing.sample.ai.book.BookActivity;
 import com.turing.sample.ai.chat.ChatActivity;
@@ -52,6 +53,8 @@ public class MainActivity extends BaseActivity {
     Button btnBook;
     @BindView(R.id.spinner_server)
     Spinner spinnerServer;
+    @BindView(R.id.btn_ea)
+    Button btnEa;
 
 
     private UserData mUserData;
@@ -79,31 +82,27 @@ public class MainActivity extends BaseActivity {
                         init();
                     }
                 });
-        String server = SPUtils.getString(mContext, SERVER_KEY, "alpha");
-        if(server.equals("alpha")){
-            spinnerServer.setSelection(0);
-        }else if(server.equals("beta")){
-            spinnerServer.setSelection(1);
-        }else {
-            spinnerServer.setSelection(2);
-        }
+
 
         //选择环境,默认为正式环境
         spinnerServer.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                switch (i){
+                switch (i) {
                     case 0:
                         SPUtils.put(mContext, SERVER_KEY, "alpha");
                         SdkInitializer.setServer(UserData.SERVER_ALPHA);
+                        init();
                         break;
                     case 1:
                         SPUtils.put(mContext, SERVER_KEY, "beta");
                         SdkInitializer.setServer(UserData.SERVER_BETA);
+                        init();
                         break;
                     case 2:
                         SPUtils.put(mContext, SERVER_KEY, "product");
                         SdkInitializer.setServer(UserData.SERVER_PRODUCT);
+                        init();
                         break;
                 }
             }
@@ -123,13 +122,14 @@ public class MainActivity extends BaseActivity {
         btnBook.setEnabled(isSuccess);
         btnNlp.setEnabled(isSuccess);
         btnChat.setEnabled(isSuccess);
+        btnEa.setEnabled(isSuccess);
     }
 
     private void updateUI(final boolean isSuccess, final String text, final String deviceID) {
         mUIHandler.postRunnable(new Runnable() {
             @Override
             public void run() {
-                tvInitState.setText("deviceID: " + text);
+                tvInitState.setText(text);
                 tvDeviceID.setText(deviceID);
                 updateBtnStates(isSuccess);
             }
@@ -137,6 +137,19 @@ public class MainActivity extends BaseActivity {
     }
 
     private void init() {
+        String server = SPUtils.getString(mContext, SERVER_KEY, "alpha");
+        ApiKey apiKey = null;
+        if (server.equals("alpha")) {
+            apiKey = new ApiKey(UserData.SERVER_ALPHA);
+            spinnerServer.setSelection(0);
+        } else if (server.equals("beta")) {
+            apiKey = new ApiKey(UserData.SERVER_BETA);
+            spinnerServer.setSelection(1);
+        } else {
+            apiKey = new ApiKey(UserData.SERVER_PRODUCT);
+            spinnerServer.setSelection(2);
+        }
+
         //只是为了方便查看文件所以获取getExternalStorageDirectory()
         String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/turingos/";
         /**
@@ -146,7 +159,8 @@ public class MainActivity extends BaseActivity {
         /**
          * 默认读取AndroidManifest.xml中配置的key
          */
-        SdkInitializer.init(this, new SdkInitializerListener() {
+        if (apiKey == null) return;
+        SdkInitializer.init(this, apiKey.getApikey(), apiKey.getApiSecert(), new SdkInitializerListener() {
             @Override
             public void onSuccess(String type, UserData userData) {
                 Log.v(TAG, "type:  " + type + "deviceID： " + userData.getDeviceID());
@@ -162,8 +176,7 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-
-    @OnClick({R.id.btn_chat, R.id.btn_tts, R.id.btn_asr, R.id.btn_nlp, R.id.btn_book})
+    @OnClick({R.id.btn_chat, R.id.btn_tts, R.id.btn_asr, R.id.btn_nlp, R.id.btn_book, R.id.btn_ea})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_chat:
@@ -191,6 +204,15 @@ public class MainActivity extends BaseActivity {
                 intentBook.putExtra("userdata", (Serializable) mUserData);
                 mActivity.startActivity(intentBook);
                 break;
+            case R.id.btn_ea:
+                Intent intentEa = new Intent(mActivity, EaActivity.class);
+                intentEa.putExtra("userdata", (Serializable) mUserData);
+                mActivity.startActivity(intentEa);
+                break;
         }
+    }
+
+    @OnClick(R.id.btn_ea)
+    public void onViewClicked() {
     }
 }

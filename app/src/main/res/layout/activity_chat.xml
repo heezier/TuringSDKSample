@@ -27,6 +27,32 @@
                 android:layout_above="@+id/base_bottom"
                 android:orientation="vertical"
                 android:padding="16dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="是否合成TTS"
+                        android:gravity="center"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:layout_alignParentLeft="true">
+
+                    </TextView>
+                    <Switch
+                        android:id="@+id/switch_tts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentRight="true"
+                        android:textOn="关"
+                        android:textOff="开"
+                        android:switchMinWidth="40dp" />
+                </RelativeLayout>
+
+
                 <TextView
                     android:id="@+id/tv_results_hint"
                     android:layout_width="match_parent"

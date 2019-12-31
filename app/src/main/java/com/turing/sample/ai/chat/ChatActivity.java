@@ -5,18 +5,18 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.turing.os.client.TuringOSClient;
 import com.turing.os.client.TuringOSClientAsrListener;
 import com.turing.os.client.TuringOSClientListener;
 import com.turing.os.init.UserData;
-
 import com.turing.os.log.TuringErrorCode;
 import com.turing.os.player.TtsPlayerPool;
 import com.turing.os.request.bean.ResponBean;
@@ -43,6 +43,8 @@ public class ChatActivity extends BaseActivity {
     UserData userData;
     @BindView(R.id.tv_timer)
     TextView tvTimer;
+    @BindView(R.id.switch_tts)
+    Switch switchTts;
     private List<Msg> msgList = new ArrayList<>();
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
@@ -50,6 +52,9 @@ public class ChatActivity extends BaseActivity {
     private List<String> resultList = new ArrayList<>();
     private RecyclerView resultRecyclerView;
     private ResultAdapter resultAdapter;
+
+    private boolean enableTts = true;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,14 +68,14 @@ public class ChatActivity extends BaseActivity {
         tvTimer.setVisibility(View.GONE);
         client = TuringOSClient.getInstance(this, userData);
 
-        msgRecyclerView =(RecyclerView)findViewById(R.id.msg_recycleview);
-        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        msgRecyclerView = (RecyclerView) findViewById(R.id.msg_recycleview);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
         adapter = new MsgAdapter(msgList);
         msgRecyclerView.setAdapter(adapter);
 
-        resultRecyclerView =(RecyclerView)findViewById(R.id.result_recycleview);
-        LinearLayoutManager resultlayoutManager=new LinearLayoutManager(this);
+        resultRecyclerView = (RecyclerView) findViewById(R.id.result_recycleview);
+        LinearLayoutManager resultlayoutManager = new LinearLayoutManager(this);
         resultRecyclerView.setLayoutManager(resultlayoutManager);
         resultAdapter = new ResultAdapter(resultList);
         resultRecyclerView.setAdapter(resultAdapter);
@@ -99,6 +104,16 @@ public class ChatActivity extends BaseActivity {
                 startTextChat(str);
             }
         });
+
+        switchTts.setChecked(true);
+        switchTts.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                enableTts = b;
+            }
+        });
+
     }
 
     private void stopRecordChat() {
@@ -106,24 +121,25 @@ public class ChatActivity extends BaseActivity {
         client.stopChat();
     }
 
-    private void addSendMsg(){
+    private void addSendMsg() {
         mUIHandler.postRunnable(new Runnable() {
             @Override
             public void run() {
                 msgList.add(new Msg("语音识别中...", Msg.SENT));
-                int newSize = msgList.size() - 1;
-                adapter.notifyItemInserted(newSize);
-                msgRecyclerView.scrollToPosition(newSize);
+                adapter.updateList(msgList);
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
             }
         });
 
     }
+
     private void startRecordChat() {
-        client.startChatWithRecord(new TuringOSClientAsrListener() {
+        client.startChatWithRecord(enableTts, new TuringOSClientAsrListener() {
 
 
             @Override
             public void onRecorderStart() {
+                Log.e("yhp", "==============");
                 addSendMsg();
             }
 
@@ -147,8 +163,23 @@ public class ChatActivity extends BaseActivity {
                         resultList.add(result);
                         resultAdapter.updateList(resultList);
                         resultRecyclerView.smoothScrollToPosition(resultList.size() - 1);
-                        if(code == TuringErrorCode.WEBSOCKET_200){
+                        if (code == TuringErrorCode.WEBSOCKET_200) {
                             handlerResult(responBean);
+                        } else {
+                            if (code == 5002) {
+                                int index = 0;
+                                for (int i = msgList.size() - 1; i >= 0; i--) {
+                                    if (msgList.get(i).getType() == Msg.SENT) {
+                                        index = i;
+                                        break;
+                                    }
+                                }
+                                if (msgList.size() > 0) {
+                                    msgList.remove(index);
+                                }
+                                msgList.add(new Msg("你没有说话", Msg.SENT));
+                                adapter.updateList(msgList);
+                            }
                         }
                     }
                 });
@@ -156,13 +187,13 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onTimer(int second) {
-                //聊天中 单轮输入交互不能超过30s
+                //聊天中 单轮输入交互不能超过20s
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
                         tvTimer.setText(second + " s");
                         tvTimer.setVisibility(View.VISIBLE);
-                        if(second <= 0) {
+                        if (second <= 0) {
                             tvTimer.setVisibility(View.GONE);
                             showTost("录音超市已取消！");
                         }
@@ -188,7 +219,7 @@ public class ChatActivity extends BaseActivity {
         long time = System.currentTimeMillis();
         client.actionChat(text, new TuringOSClientListener() {
             @Override
-            public void onResult(int code, String result, ResponBean responBean) {
+            public void onResult(int code, String result, ResponBean responBean, String extension) {
                 long diff = System.currentTimeMillis() - time;
                 Log.v(TAG, "diff:" + diff);
                 mUIHandler.postRunnable(new Runnable() {
@@ -212,43 +243,48 @@ public class ChatActivity extends BaseActivity {
         msgRecyclerView.scrollToPosition(newSize);
     }
 
-    private void handlerResult(ResponBean responBean){
-        if(responBean != null && responBean.getAsrResponse() != null){
+    private void handlerResult(ResponBean responBean) {
+        if (responBean != null && responBean.getAsrResponse() != null) {
             String asrResult = responBean.getAsrResponse().getValue();
             int index = 0;
-            if(msgList.size() >= 1){
-                index = msgList.size() - 1;
+            for (int i = msgList.size() - 1; i >= 0; i--) {
+                if (msgList.get(i).getType() == Msg.SENT) {
+                    index = i;
+                    break;
+                }
             }
-            msgList.remove(index);
-            if(!TextUtils.isEmpty(asrResult)){
+            if (msgList.size() > 0) {
+                msgList.remove(index);
+            }
+            if (!TextUtils.isEmpty(asrResult)) {
                 msgList.add(new Msg(asrResult, Msg.SENT));
-            }else{
+            } else {
                 msgList.add(new Msg("你没有说话", Msg.SENT));
             }
             adapter.updateList(msgList);
         }
-        if(responBean != null && responBean.getNlpResponse() != null
-                && responBean.getNlpResponse().getResults() != null){
+        if (responBean != null && responBean.getNlpResponse() != null
+                && responBean.getNlpResponse().getResults() != null) {
 
             List<ResponBean.NlpResponseBean.ResultsBean> resultsBeanList = responBean.getNlpResponse().getResults();
             ResponBean.NlpResponseBean.ResultsBean.ValuesBean valuesBean = resultsBeanList.get(0).getValues();
-            if(valuesBean != null){
+            if (valuesBean != null) {
                 String content = valuesBean.getText();
-                String voiceUrl = valuesBean.getTtsUrl().get(0);
-                playUrl(voiceUrl);
+                if (valuesBean.getTtsUrl() != null) {
+                    String voiceUrl = valuesBean.getTtsUrl().get(0);
+                    playUrl(voiceUrl);
+                }
                 msgList.add(new Msg(content, Msg.RECEIVED));
-//                adapter.updateList(msgList);
-                int newSize = msgList.size() - 1;
-                adapter.notifyItemChanged(newSize);
-                msgRecyclerView.scrollToPosition(newSize);
+                adapter.updateList(msgList);
+                msgRecyclerView.scrollToPosition(msgList.size() - 1);
             }
-        }else{
+        } else {
 
         }
     }
 
-    private void playUrl(String url){
-        if(TextUtils.isEmpty(url)) return;
+    private void playUrl(String url) {
+        if (TextUtils.isEmpty(url)) return;
         TtsPlayerPool ttsPlayerPool = TtsPlayerPool.create(1);
         ttsPlayerPool.addPlayUrl(url);
         ttsPlayerPool.start();

@@ -110,7 +110,7 @@ public class NlpActivity extends BaseActivity {
 
         client.actionNlp(text, requestConfig, new TuringOSClientListener() {
             @Override
-            public void onResult(int code, String result, ResponBean responBean) {
+            public void onResult(int code, String result, ResponBean responBean, String extension) {
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -143,7 +143,7 @@ public class NlpActivity extends BaseActivity {
                 if(client != null){
                     client.actionFirstConversion(new TuringOSClientListener() {
                         @Override
-                        public void onResult(int code, String result, ResponBean responBean) {
+                        public void onResult(int code, String result, ResponBean responBean, String extension) {
                             mUIHandler.postRunnable(new Runnable() {
                                 @Override
                                 public void run() {
@@ -168,7 +168,7 @@ public class NlpActivity extends BaseActivity {
                 if(client != null){
                     client.actionAutoConversion(new TuringOSClientListener() {
                         @Override
-                        public void onResult(int code, String result, ResponBean responBean) {
+                        public void onResult(int code, String result, ResponBean responBean, String extension) {
                             mUIHandler.postRunnable(new Runnable() {
                                 @Override
                                 public void run() {

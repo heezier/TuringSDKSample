@@ -91,7 +91,7 @@ implementation "org.java-websocket:Java-WebSocket:1.4.0"
      * @param secert 图灵开放平台注册的secert
      * @param sdkInitializerListener
      */
-	public static void init(@NonNull Context context, @NonNull String apiKey, @NonNull String secert, SdkInitializerListener sdkInitializerListener)
+	public static void init(Context context, String apiKey, String secert, SdkInitializerListener sdkInitializerListener)
     
     /**
      * 
@@ -101,8 +101,8 @@ implementation "org.java-websocket:Java-WebSocket:1.4.0"
      * @param secert 图灵开放平台注册的secert
      * @param sdkInitializerListener
      */
-    public static void init(@NonNull String deviceID, @NonNull Context context, @NonNull String apiKey,
-                            @NonNull String secert, @NonNull SdkInitializerListener sdkInitializerListener)
+    public static void init(String deviceID, Context context, String apiKey,
+                            String secert, SdkInitializerListener sdkInitializerListener)
         
         //调用
         SdkInitializer.init(context, sdkInitializerListener);
@@ -212,6 +212,25 @@ UserData说明
 	SdkInitializer.setDebug(path, true)
 ```
 
+### 设置环境
+
+设置服务器环境，便于集成SDK时调试。
+
+```java
+	/**
+     * 设置服务器环境，便于集成SDK时调试
+     * @param type
+     */
+ 	public static void setServer(@UserData.ServerChannel int type);
+ 	
+ 	//调用
+ 	SdkInitializer.setServer(UserData.SERVER_ALPHA);
+```
+
+| 参数 | 类型                                                         | 默认值                |
+| ---- | ------------------------------------------------------------ | --------------------- |
+| type | UserData.ServerChannel{SERVER_ALPHA, SERVER_BETA, SERVER_PRODUCT} | UserData.SERVER_ALPHA |
+
 
 
 ### 创建TuringOSClient
@@ -220,7 +239,7 @@ TuringOSClient是SDK提供外部功能的管理类，每个模块的功能调用
 
 ```java
 //创建
-TuringOSClient client = TuringOSClient.getInstance(mContext, userData);
+TuringOSClient turingOSClient = TuringOSClient.getInstance(mContext, userData);
 ```
 
 | 参数     | 类型     | 说明                                                    |
@@ -248,7 +267,7 @@ public interface TuringOSClientAsrListener {
     void onStop();
     
     /**
-     * 允许输入音频数据流，在该方法回调之后开始调用sendPcmData或者sendEncodeData
+     * 允许输入音频数据流，在该方法回调之后开始调用sendAudio
      */
     void onStreamOpen();
 
@@ -283,36 +302,42 @@ public interface TuringOSClientAsrListener {
 
 AsrRequestConfig说明：Asr识别必要参数
 
-| 参数                 | 类型                                 | 默认值          | 说明                                               |
-| -------------------- | ------------------------------------ | --------------- | -------------------------------------------------- |
-| asrFormatEnum        | {PCM, OPUS, OPU, SPEEX}              | PCM             | 上传至云端的音频格式，**<u>目前仅支持PCM</u>**     |
-| asrLanguageEnum      | {CHINESE, ENGLISH}                   | CHINESE         | 识别语言类型                                       |
-| asrRateEnum          | {RATE_8000, RATE_16000}              | RATE_16000      | 音频采样率                                         |
-| channel              | {CHANNEL_IN_MONO, CHANNEL_IN_STEREO} | CHANNEL_IN_MONO | CHANNEL_IN_MONO：单声道；CHANNEL_IN_STEREO：双声道 |
-| enableITN            | boolean                              | false           |                                                    |
-| enablePunctuation    | boolean                              | false           |                                                    |
-| enableVoiceDetection | boolean                              | fasle           | 是否开启VAD                                        |
-| intermediateResult   | boolean                              | true            | 是否打开中间返回结果                               |
-| maxEndSilence        | int                                  | 2000            | VAD前端检测值，单位为毫秒                          |
-| maxStartSilence      | int                                  | 800             | VAD末端检测值，单位为毫秒                          |
+| 参数                 | 类型                                 | 默认值          | 说明                                                 |
+| -------------------- | ------------------------------------ | --------------- | ---------------------------------------------------- |
+| asrSrcFormatEnum     | {PCM, OPUS, OPU, SPEEX}              | 无              | 当不使用内部录音器的时候该值为必填                   |
+| asrFormatEnum        | {PCM, OPUS, OPU, SPEEX}              | PCM             | 上传至云端的音频格式，**<u>目前仅支持PCM和OPUS</u>** |
+| asrLanguageEnum      | {CHINESE, ENGLISH}                   | CHINESE         | 识别语言类型                                         |
+| asrRateEnum          | {RATE_8000, RATE_16000}              | RATE_16000      | 音频采样率                                           |
+| channel              | {CHANNEL_IN_MONO, CHANNEL_IN_STEREO} | CHANNEL_IN_MONO | CHANNEL_IN_MONO：单声道；CHANNEL_IN_STEREO：双声道   |
+| enableITN            | boolean                              | false           |                                                      |
+| enablePunctuation    | boolean                              | false           |                                                      |
+| enableVoiceDetection | boolean                              | fasle           | 是否开启VAD                                          |
+| intermediateResult   | boolean                              | true            | 是否打开中间返回结果                                 |
+| maxEndSilence        | int                                  | 2000            | VAD前端检测值，单位为毫秒                            |
+| maxStartSilence      | int                                  | 800             | VAD末端检测值，单位为毫秒                            |
 
 AsrRequestConfig参数的配置：
 
 ```java
-AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
-builder.asrFormatEnum(AsrRequestConfig.CHINESE);
-builder.asrFormatEnum(AsrRequestConfig.PCM);
-builder.asrRateEnum(AsrRequestConfig.RATE_16000);
-builder.enablePunctuation(false);
-builder.maxEndSilence(3000);
-builder.maxStartSilence(800);
-builder.channel(AsrRequestConfig.CHANNEL_IN_MONO);
-builder.enableVoiceDetection(false);
-AsrRequestConfig asrRequestConfig = builder.build();
+ 		AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
+        builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
+        builder.asrFormatEnum(AsrRequestConfig.PCM);
+        builder.asrSrcFormatEnum(AsrRequestConfig.PCM);
+        builder.asrRateEnum(AsrRequestConfig.RATE_16000);
+        builder.enablePunctuation(false);
+        builder.intermediateResult(true);
+        builder.maxEndSilence(3000);
+        /**
+         * CHANNEL_IN_MONO或者CHANNEL_IN_STEREO
+         */
+        builder.channel(AsrRequestConfig.CHANNEL_IN_MONO);
+        builder.enableVoiceDetection(false);
+
+        AsrRequestConfig asrRequestConfig = builder.build();
 
 ```
 
-注意事项：如果调用startChatWithRecord(asrRequestConfig, listener)或者initAsrPcmStream( asrRequestConfig, listener)，输入的原始数据要求都是PCM，在此情况下设置asrFormatEnum为PCM，则会将输入的音频原数据直接上传至云端识别，如果设置asrFormatEnum为OPUS，则SDK会内部将PCM编码为OPUS再上传至云端进行识别。注：目前仅支持PCM格式。
+
 
 #### 开启ASR调用方法
 
@@ -322,61 +347,90 @@ AsrRequestConfig会默认创建，使用默认值
 
 ```java
 	/**
-     * 方法说明
-     * @param listener TuringOSClientAsrListener
      * 
+     * @param isLoop 是否循环录音识别
+     * @param listener TuringOSClientAsrListener
      */
-	public void startAsrWithRecorder(TuringOSClientAsrListener listener)
+    public void startAsrWithRecorder(boolean isLoop, TuringOSClientAsrListener listener)
 	
 	//调用
-	client.startChatWithRecord(listener);
+	turingOSClient.startChatWithRecord(false, listener);
 	
 ```
+
+
 
 ##### 二、有参输入使用SDK内部录音进行ASR识别
 
 ```java
 	/**
-     * 方法说明
-     * @param asrRequestConfig AsrRequestConfig
+     * 
+     * @param isLoop 是否循环录音识别
+     * @param asrRequestConfig  AsrRequestConfig
      * @param listener TuringOSClientAsrListener
      */
-	public void startAsrWithRecorder(TuringOSClientAsrListener listener)
+    public void startAsrWithRecorder(boolean isLoop, final AsrRequestConfig asrRequestConfig, final TuringOSClientAsrListener listener)
 	
 	//调用
-	client.startChatWithRecord(asrRequestConfig, listener);
+	turingOSClient.startChatWithRecord(asrRequestConfig, listener);
 ```
 
-##### 三、输入PCM数据流进行识别
+注意：
+
+调用该方法时，asrRequestConfig中的asrFormatEnum取值只能为PCM或者OPUS。在使用内部录音器时，asrFormatEnum值为PCM时，会将录音的PCM数据上传进行识别，当配置为OPUS时，则会经过SDK内部编码为OPUS再上传至云端识别。
+
+
+
+##### 三、输入音频数据流进行识别
 
 方法说明
 
 ```java
-	/**
-     * 方法说明:PCM流输入初始化方法
-     * @param asrRequestConfig AsrRequestConfig
+	
+    /**
+     * 
+     * @param asrRequestConfig asrRequestConfig
      * @param listener TuringOSClientAsrListener
      */
-	public void initAsrPcmStream(AsrRequestConfig asrRequestConfig,  				TuringOSClientAsrListener listener)
+    public void initAsrStream(final AsrRequestConfig asrRequestConfig, final TuringOSClientAsrListener listener)
 	
-	/**
-     * 方法说明:PCM流输入
-     * @param dataBuffer pcm音频数据
+	 /**
+     * 
+     * @param dataBuffer 音频数据
+     * @param length 音频数据长度
      */
-    public void sendPcmData(byte[] dataBuffer)
+    public void sendAudio(byte[] dataBuffer, int length)
 	
 ```
 
 调用示例
 
 ```java
-	//第一步：初始化
+    //第一步：参数配置
+    AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
+    builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
+
+    //必须参数，代表最终上传服务器请求的格式参数，必须与传入可支持的格式对应
+    builder.asrFormatEnum(AsrRequestConfig.OPUS);
+
+	//必须参数，代表音频源的格式
+    builder.asrSrcFormatEnum(AsrRequestConfig.OPUS);
+    builder.asrRateEnum(AsrRequestConfig.RATE_16000);
+    builder.enablePunctuation(false);
+    builder.maxEndSilence(3000);
+    builder.channel(AsrRequestConfig.CHANNEL_IN_MONO);
+
+    AsrRequestConfig asrRequestConfig = builder.build();
+    turingOSClient = TuringOSClient.getInstance(this, userData);	
+
+
+	//第二步：初始化
 	/**
      *
      * @param asrRequestConfig AsrRequestConfig
      * @param listener TuringOSClientAsrListener
      */
-	turingOSClient.initAsrPcmStream(asrRequestConfig, new TuringOSClientAsrListener() {
+	turingOSClient.initAsrStream(asrRequestConfig, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
@@ -403,12 +457,7 @@ AsrRequestConfig会默认创建，使用默认值
 
             @Override
             public void onTimer(int second) {
-            	 //再倒计时回调中监听，当second <= 0时应该停止数据输入
-                if(second <= 0){
-                    if(turingOSClient != null){
-                        turingOSClient.stopAsr();
-                    }
-                }
+            	 
             }
 
             @Override
@@ -421,83 +470,41 @@ AsrRequestConfig会默认创建，使用默认值
      
       //注意事项：在音频流关闭之后调用turingOSClient.stopAsr();
       private void startStreamPcmInput() {
-        try {
-            InputStream inputStream = getAssets().open("record_.pcm");
-            byte[] buffer = new byte[320];
-            while (true) {
-                int length = inputStream.read(buffer);
-                if (length == -1) {
-                    //第三步：结束识别
-                    turingOSClient.stopAsr();
-                    break;
-                }
-                 //第二步中：输入音频数据流，不断发送音频数据 turingOSClient.sendPcmData(buffer);
-                if (length == 320) {
-                    turingOSClient.sendPcmData(buffer);
-                } else {
-                    turingOSClient.sendPcmData(Arrays.copyOf(buffer, length));
-                }
-             
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            new Thread(pcmRun).start();
         }
-    }
+      	//注意事项：在音频流关闭之后调用turingOSClient.stopAsr();
+       private Runnable pcmRun = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                InputStream inputStream = getAssets().open("record.pcm");
+                while (!isPcmStop) {
+                    byte[] buffer = new byte[320];
+                    int length = inputStream.read(buffer);
+                    if (length == -1) {
+                        turingOSClient.stopAsr();
+                        break;
+                    }
+                    if (length == 320) {
+                        //第三步 发送数据
+                        turingOSClient.sendAudio(buffer, length);
+                    } else {
+                        turingOSClient.sendAudio(Arrays.copyOf(buffer, length), length);
+                    }
+                }
+   
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 ```
 
 
 
-##### 四、输入编码后的数据进行识别
+##### 四、流输入方式说明
 
-调用过程和*输入PCM数据进行识别*一样。具体支持格式详见AsrRequestConfig说明。
-
-方法说明
-
-```java
-	/**
-     * 方法说明:编码过的音频流输入初始化方法
-     * @param asrRequestConfig AsrRequestConfig
-     * @param listener TuringOSClientAsrListener
-     */
-	public void initAsrEncodeStream(AsrRequestConfig asrRequestConfig, 					TuringOSClientAsrListener listener)
-	
-	/**
-     * 方法说明:编码后的音频流输入
-     * @param dataBuffer 音频数据
-     */
-    public void sendEncodeData(byte[] dataBuffer)
-```
-
-调用示例
-
-```java
-
-	//第一步：初始化
-	/**
-     *
-     * @param asrRequestConfig AsrRequestConfig
-     * @param listener TuringOSClientAsrListener
-     */
-	turingOSClient.initAsrEncodeStream(asrRequestConfig, listener);
-	
-	//第二步：发送数据
-	//在TuringOSClientAsrListener回调onStreamOpen方法中开始发送数据
-    /**
-     * 
-     * @param dataBuffer 编码后的音频数据
-     * @param format 音频的格式
-     */
-	turingOSClient.sendEncodeData(enBytes, AsrRequestConfig.OPUS);
-	
-
-	//第三结束数据发送
-	 turingOSClient.stopAsr();
-	 
-```
-
-##### 五、流输入方式说明
-
-凡是输入音频流的方式，每一次调用initAsrPcmStream或者initAsrEncodeStream，之后发送数据sendPcmData或者sendEncodeData，然后stopAsr。这一个完整的步骤为一个ASR交互周期。ASR交互周期最长时间支持20S，超出20S之后会触发TuringOSClientAsrListener接口的onStop方法以及onError方法。所以应当业务场景需要的情况下，需要在onStop之后重新调用initAsrPcmStream或者initAsrEncodeStream，开启新的一轮识别。
+在调用流输入方式时，asrFormatEnum和asrSrcFormatEnum为必须参数。当将要输入的音频数据源为PCM时，则asrSrcFormatEnum为PCM，对应的asrFormatEnum的可能值只能为PCM或者OPUS，同内部录音器，SDK内部默认支持OPUS编码。当asrSrcFormatEnum为其他值时，对应的asrFormatEnum必须与asrSrcFormatEnum相等。
 
 
 
@@ -539,7 +546,7 @@ json示例如下：
      public void stopAsr()
      
      //调用示例
-	client.stopAsr();
+	turingOSClient.stopAsr();
 ```
 
 #### 释放releaseAsr()
@@ -552,7 +559,7 @@ json示例如下：
      public void release()
      
      //调用示例
-	client.release();
+	turingOSClient.release();
 ```
 
 ### TTS调用
@@ -572,8 +579,9 @@ TuringOSClientListener说明：TTS、NLP、文字类型的AI对话、绘本识�
          * @param result 返回的json字符串
          * @param isLast Asr识别结果；last : 是否是最终结果
          * @param responBean  返回的json字符串转换的Java对象
+         *@param extension  扩展参数
          */
-        void onResult(int code, String result, ResponBean responBean);   
+        void onResult(int code, String result, ResponBean responBean, String extension);   
         
         
         /**
@@ -594,7 +602,7 @@ TuringOSClientListener说明：TTS、NLP、文字类型的AI对话、绘本识�
     public static SparseArray<String> split(String text)
     
     //调用
-    SparseArray<String> textList = client.SparseArray(text);
+    SparseArray<String> textList = turingOSClient.SparseArray(text);
 ```
 
 #### TTS调用
@@ -616,7 +624,7 @@ TuringOSClientListener说明：TTS、NLP、文字类型的AI对话、绘本识�
 ```java
 
     //返回的语音MP3地址会按照该textList对应的文字顺序返回
-    SparseArray<String> textList = client.actionTts(text, listener);
+    SparseArray<String> textList = turingOSClient.actionTts(text, listener);
 
 ```
 
@@ -744,9 +752,9 @@ NlpRequestConfig参数创建（具体参数可参考TuringSDKSample）
 
 ```java
 
-    client.actionNlp(text, listener);
+    turingOSClient.actionNlp(text, listener);
 	//or
-    client.actionNlp(text, requestConfig, listener);
+    turingOSClient.actionNlp(text, requestConfig, listener);
 
 ```
 
@@ -785,13 +793,26 @@ json示例如下：
 
 
 
+#### 口语评测
+
+```java
+/**
+*  
+* @param word 口语测评的单词
+* @param listener 
+*/
+public void startEAWithRecorder(String word, TuringOSClientListener listener)
+```
+
+
+
 ### AI对话调用
 
 #### 参数说明
 
 TuringOSClientListener、NlpRequestConfig、AsrRequestConfig同上。
 
-##### 一、文字输入的AI对话
+##### 一、无参文字输入的AI对话
 
 带有NlpRequestConfig参数的方法意指可以指定此次对话使用的技能
 
@@ -804,7 +825,7 @@ TuringOSClientListener、NlpRequestConfig、AsrRequestConfig同上。
 	public void actionChat(String text, TuringOSClientListener listener)
 	
 	//调用
-	client.actionChat(text, listener);
+	turingOSClient.actionChat(text, listener);
 
 	/**
      * 方法说明
@@ -815,24 +836,26 @@ TuringOSClientListener、NlpRequestConfig、AsrRequestConfig同上。
 	public void actionChat(String text, NlpRequestConfig requestConfig, 						TuringOSClientListener listener)
 	
 	//调用
-	client.actionChat(text, requestConfig, listener);
+	turingOSClient.actionChat(text, requestConfig, listener);
 	
 ```
 
 ##### 二、无参输入使用SDK内部录音进行AI对话
 
-AsrRequestConfig会默认创建，使用默认值
+AsrRequestConfig会默认创建，使用默认值。
+
+enableTts意指是否需要将对话结果合成TTS，文字输入AI对话时默认合成TTS。
 
 ```java
 	/**
-     * 方法说明
-     * @param listener TuringOSClientAsrListener
-     * 
+     *
+     * @param enableTts 是否合成TTS
+     * @param listener
      */
-	public void startChatWithRecord(TuringOSClientAsrListener listener)
+    public void startChatWithRecord(boolean enableTts, final TuringOSClientAsrListener listener)
 	
 	//调用
-	client.startChatWithRecord(listener);
+	turingOSClient.startChatWithRecord(false, listener);
 	
 ```
 
@@ -841,42 +864,46 @@ AsrRequestConfig会默认创建，使用默认值
 ```java
 	 /**
      * 
-     * @param asrRequestConfig 
-     * @param nlpRequestConfig 同NLP中的NlpRequestConfig，可以为空
+     * @param enableTts 是否合成TTS
+     * @param asrRequestConfig 不能为null
+     * @param nlpRequestConfig 同NLP中的NlpRequestConfig，可以为null
      * @param listener
      */
-    public void startChatWithRecord(AsrRequestConfig asrRequestConfig, NlpRequestConfig nlpRequestConfig, TuringOSClientAsrListener listener)
+    public void startChatWithRecord(boolean enableTts, AsrRequestConfig asrRequestConfig, NlpRequestConfig nlpRequestConfig, TuringOSClientAsrListener listener)
 	
-	//调用  nlpRequestConfig为可配置项，可以为空
-	client.startChatWithRecord(asrRequestConfig, null, listener);
+	//调用  nlpRequestConfig为可配置项，可以为null
+	turingOSClient.startChatWithRecord(true, asrRequestConfig, null, listener);
 ```
 
-##### 四、输入PCM数据进行AI对话
+##### 四、输入音频流进行AI对话
 
 方法说明
 
 ```java
 	 /**
      * 
-     * @param asrRequestConfig 
+     * @param enableTts 是否合成TTS
+     * @param asrRequestConfig 不能为null
      * @param nlpRequestConfig 同NLP中的NlpRequestConfig，可以为空
      * @param listener
      */
-	public void initChatPcmStream(AsrRequestConfig asrRequestConfig, NlpRequestConfig nlpRequestConfig, TuringOSClientAsrListener listener)
+	public void initChatStream(boolean enableTts, AsrRequestConfig asrRequestConfig, NlpRequestConfig nlpRequestConfig, TuringOSClientAsrListener listener)
 	
 	/**
-     * 方法说明:PCM流输入
-     * @param dataBuffer pcm音频数据
+     * 
+     * @param dataBuffer 音频数据
+     * @param length 音频数据长度
      */
-    public void sendPcmData(byte[] dataBuffer)
+    public void sendAudio(byte[] dataBuffer, int length)
 	
 ```
 
 调用示例
 
 ```java
-	
-	turingOSClient.initChatPcmStream(asrRequestConfig, null, new TuringOSClientAsrListener() {
+	//asrRequestConfig创建规则以及参数说明同ASR中音频流输入
+	//第一步 初始化
+	turingOSClient.initChatStream(true，asrRequestConfig, null, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
@@ -903,12 +930,7 @@ AsrRequestConfig会默认创建，使用默认值
 
             @Override
             public void onTimer(int second) {
-            	 //再倒计时回调中监听，当second <= 0时应该停止数据输入
-                if(second <= 0){
-                    if(turingOSClient != null){
-                        turingOSClient.stopAsr();
-                    }
-                }
+            	
             }
 
             @Override
@@ -919,80 +941,38 @@ AsrRequestConfig会默认创建，使用默认值
         
         
      
-      //注意事项：在音频流关闭之后调用turingOSClient.stopAsr();
-      private void startStreamPcmInput() {
-        try {
-            InputStream inputStream = getAssets().open("record_.pcm");
-            byte[] buffer = new byte[320];
-            while (true) {
-                int length = inputStream.read(buffer);
-                if (length == -1) {
-                    turingOSClient.stopChat();
-                    break;
-                }
-                 //第二步中：输入音频数据流，不断发送音频数据 turingOSClient.sendPcmData(buffer);
-                if (length == 320) {
-                    turingOSClient.sendPcmData(buffer);
-                } else {
-                    turingOSClient.sendPcmData(Arrays.copyOf(buffer, length));
-                }
-                 Thread.sleep(300);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        private void startStreamPcmInput() {
+            new Thread(pcmRun).start();
         }
-    }
+      	//注意事项：在音频流关闭之后调用turingOSClient.stopAsr();
+       private Runnable pcmRun = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                InputStream inputStream = getAssets().open("record.pcm");
+                while (!isPcmStop) {
+                    byte[] buffer = new byte[320];
+                    int length = inputStream.read(buffer);
+                    if (length == -1) {
+                        turingOSClient.stopAsr();
+                        break;
+                    }
+                    if (length == 320) {
+                        //第三步 发送数据
+                        turingOSClient.sendAudio(buffer, length);
+                    } else {
+                        turingOSClient.sendAudio(Arrays.copyOf(buffer, length), length);
+                    }
+                }
+   
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 ```
 
 
-
-##### 五、输入编码后的数据进行AI对话
-
-调用过程和*输入PCM数据进行识别*一样。具体支持格式详见AsrRequestConfig说明。
-
-方法说明
-
-```java
-	/**
-     *
-     * @param asrRequestConfig
-     * @param nlpRequestConfig
-     * @param listener
-     */
-	public void initChatEncodeStream(AsrRequestConfig asrRequestConfig, NlpRequestConfig nlpRequestConfig, TuringOSClientAsrListener listener)
-	
-	/**
-     * 方法说明:编码后的音频流输入
-     * @param dataBuffer 音频数据
-     */
-    public void sendEncodeData(byte[] dataBuffer)
-```
-
-调用示例
-
-```java
-	//第一步：初始化
-	/**
-     *
-     * @param asrRequestConfig AsrRequestConfig
-     * @param listener TuringOSClientAsrListener
-     */
-	turingOSClient.initChatEncodeStream(asrRequestConfig, listener);
-	
-	//第一步：发送数据
-	//在TuringOSClientAsrListener回调onStreamOpen方法中开始发送数据
-    /**
-     * 
-     * @param dataBuffer 编码后的音频数据
-     * @param format 音频的格式
-     */
-	turingOSClient.sendEncodeData(enBytes, AsrRequestConfig.OPUS);
-	
-
-	//第三步：结束数据发送
-	 turingOSClient.stopChat();
-	 
-```
 
 #### AI对话输出
 
@@ -1001,6 +981,8 @@ AsrRequestConfig会默认创建，使用默认值
 具体看TuringOSClientListener接口的onResult方法说明。
 
 json示例如下：
+
+asr结果：
 
 ```json
 {
@@ -1017,6 +999,8 @@ json示例如下：
 ```
 
 
+
+AI对话结果
 
 ```json
 {
@@ -1131,6 +1115,25 @@ BookRequestConfig
 
 
 ```
+
+##### 三、内页QA输入
+
+当绘本当前页支持QA问答时（operateState =3000），可以调用startQAWithRecorder打开录音器回答问题。
+
+```java
+    /**
+     * 
+     * @param listener
+     */
+    public void startQAWithRecorder(TuringOSClientListener listener)
+        
+        
+    //调用
+    turingOSClient.startQAWithRecorder(listener);  
+     
+```
+
+
 
 #### 绘本输出
 
