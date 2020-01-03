@@ -18,7 +18,6 @@ import com.turing.os.client.TuringOSClientListener;
 import com.turing.os.init.UserData;
 import com.turing.os.player.TtsPlayerPool;
 import com.turing.os.request.bean.ResponBean;
-
 import com.turing.sample.R;
 import com.turing.sample.ai.asr.AsrResultAdapter;
 import com.turing.sample.ai.chat.ResultAdapter;
@@ -101,13 +100,13 @@ public class TtsActivity extends BaseActivity {
             return;
         }
         //针对较长的字符串，将会切割返回
-        SparseArray<String> list = client.split(str);
+        SparseArray<String> list = client.split(text);
         for (int i = 0; i < list.size(); i++) {
             Log.d(TAG, list.get(i).length() + "==========" + list.get(i));
         }
         ttsPlayerPool = TtsPlayerPool.create(list.size());
 
-        client.actionTts(str, new TuringOSClientListener() {
+        client.actionTts(text, new TuringOSClientListener() {
             @Override
             public void onResult(int code, String result, ResponBean responBean, String extension) {
                 if (responBean != null && responBean.getNlpResponse() != null

@@ -76,6 +76,7 @@ public class EaActivity extends BaseActivity {
                         @Override
                         public void run() {
                             closeAlertDialog();
+                            tvResult.setText(result);
                         }
                     });
                 }
@@ -89,6 +90,7 @@ public class EaActivity extends BaseActivity {
             alertDialog = new AlertDialog.Builder(mContext)
                     .setView(view)
                     .create();
+            alertDialog.setCanceledOnTouchOutside(false);
             tv_word = view.findViewById(R.id.tv_word);
         }
         tv_word.setText(word);

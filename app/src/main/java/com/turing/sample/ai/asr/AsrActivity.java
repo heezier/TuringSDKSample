@@ -306,6 +306,7 @@ public class AsrActivity extends BaseActivity {
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
+                        updateResult(code, msg, null);
                         updateUI(MODE_NONE);
                     }
                 });
@@ -404,7 +405,7 @@ public class AsrActivity extends BaseActivity {
                     } else {
                         turingOSClient.sendAudio(Arrays.copyOf(buffer, length), length);
                     }
-                    Thread.sleep(100);
+                    Thread.sleep(30);
                 }
                 Log.i(TAG, "testFile: 流输入完成");
             } catch (Exception e) {

@@ -45,7 +45,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -80,6 +79,8 @@ public class BookActivity extends BaseActivity {
     TextView tvMode;
     @BindView(R.id.btn_qa)
     Button btnQa;
+    @BindView(R.id.tv_number)
+    TextView tvNumber;
 
 
     private CameraVideo cameraVideo;
@@ -306,7 +307,6 @@ public class BookActivity extends BaseActivity {
     }
 
 
-
     @OnClick({R.id.btn_reset_cover, R.id.btn_setting, R.id.btn_qa})
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -345,20 +345,28 @@ public class BookActivity extends BaseActivity {
                                     responBean.getNlpResponse().getIntent().getParameters().getTitleData();
                             if (titleDataBean != null) {
                                 String successResult = intentCode + " BookID: " + titleDataBean.getBookId() + "BookName: " + titleDataBean.getBookName();
-                                String hint = "封面识别成功，BookID:" + titleDataBean.getBookId();
+                                String hint = "BookID:" + titleDataBean.getBookId();
                                 tvResultsHint.setText(hint);
                                 tvMode.setText(mContext.getString(R.string.page));
                                 btnResetCover.setEnabled(true);
                                 bookID = titleDataBean.getBookId();
 
                             }
-                        }else if(intentCode == 201){
+                        } else if (intentCode == 201) {
+                            ResponBean.NlpResponseBean.IntentBean.ParametersBean parametersBean
+                                    = responBean.getNlpResponse().getIntent().getParameters();
+                            if(parametersBean != null && parametersBean.getInnerData() != null){
+                                if(tvNumber != null){
+                                    tvNumber.setText("Page:" + parametersBean.getInnerData().getPageNum());
+                                }
+                            }
+
                             int operateState = responBean.getNlpResponse().getIntent().getOperateState();
-                            if(operateState == 3000){
+                            if (operateState == 3000) {
                                 curQuestions = responBean.getNlpResponse().getResults();
                                 btnQa.setEnabled(true);
                                 btnQa.setBackgroundResource(R.drawable.selector_send_bg);
-                            }else{
+                            } else {
                                 btnQa.setEnabled(false);
                                 btnQa.setBackgroundResource(R.drawable.bg_press_true);
                             }
@@ -380,8 +388,8 @@ public class BookActivity extends BaseActivity {
         }
     }
 
-    private void handQA(){
-        if(curQuestions != null){
+    private void handQA() {
+        if (curQuestions != null) {
             showAlertDialog();
         }
     }
@@ -390,61 +398,75 @@ public class BookActivity extends BaseActivity {
     private void showAlertDialog() {
         List<String> questions = new ArrayList<>();
         List<String> questionsText = new ArrayList<>();
-        for(int i = 0; i < curQuestions.size(); i++){
-            if(curQuestions.get(i).getValues() != null && curQuestions.get(i).getValues().getTtsUrl() != null){
+        for (int i = 0; i < curQuestions.size(); i++) {
+            if (curQuestions.get(i).getValues() != null && curQuestions.get(i).getValues().getTtsUrl() != null) {
                 questions.add(curQuestions.get(i).getValues().getTtsUrl().get(0));
                 questionsText.add(curQuestions.get(i).getValues().getText());
             }
         }
-        if(questions.size() <= 0){
+        if (questions.size() <= 0) {
             Log.e(TAG, "No Qa data !");
             return;
         }
 
         if (alertDialog == null) {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.layout_oral_evaluation, null);
+            View view = LayoutInflater.from(mContext).inflate(R.layout.layout_qa_evaluation, null);
             alertDialog = new AlertDialog.Builder(mContext)
                     .setView(view)
                     .create();
+            alertDialog.setCanceledOnTouchOutside(false);
             tv_word = view.findViewById(R.id.tv_word);
             tv_questing = view.findViewById(R.id.tv_questing);
             iv_icon = view.findViewById(R.id.iv_icon);
         }
-        updateDialog(questionsText.toString(), " ");
         alertDialog.show();
-        playQuestions(questions);
+        curQaState = QAState.Questing;
+        handleQA(questionsText, questions, curQaState, "");
+
     }
 
-    private void playQuestions(List<String> questions){
+    private void playQuestions(List<String> questions) {
         ttsPlayerPool = TtsPlayerPool.create(questions.size());
         ttsPlayerPool.addPlayUrl(questions);
         ttsPlayerPool.setCallback(new TtsPlayCallback());
         ttsPlayerPool.start();
     }
+
     private void closeAlertDialog() {
         if (alertDialog != null) {
             alertDialog.dismiss();
         }
     }
 
-    private void updateDialog(String questionsText, String asr){
-        if(alertDialog != null && alertDialog.isShowing()){
-            if(tv_questing != null && !TextUtils.isEmpty(questionsText)){
-                tv_questing.setText(questionsText);
+    private void updateDialog(String questionsText, String asr) {
+        mUIHandler.postRunnable(new Runnable() {
+            @Override
+            public void run() {
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    tv_questing = alertDialog.findViewById(R.id.tv_questing);
+                    if (tv_questing != null && !TextUtils.isEmpty(questionsText)) {
+                        tv_questing.setText(questionsText);
+                    }
+                    tv_word = alertDialog.findViewById(R.id.tv_word);
+                    if (tv_word != null && !TextUtils.isEmpty(asr)) {
+                        tv_word.setText(asr);
+                    }else{
+                        tv_word.setText("");
+                    }
+                }
             }
-            if(tv_word != null && !TextUtils.isEmpty(asr)){
-                tv_word.setText(asr);
-            }
-        }
+        });
+
     }
-    class TtsPlayCallback implements TtsPlayerCallback{
+
+    class TtsPlayCallback implements TtsPlayerCallback {
 
         @Override
         public void onPlayStart() {
             mUIHandler.postRunnable(new Runnable() {
                 @Override
                 public void run() {
-                    if(iv_icon != null){
+                    if (iv_icon != null) {
                         iv_icon.setBackgroundResource(R.mipmap.voice);
                     }
                 }
@@ -461,10 +483,21 @@ public class BookActivity extends BaseActivity {
             mUIHandler.postRunnable(new Runnable() {
                 @Override
                 public void run() {
-                    if(iv_icon != null){
+                    if (iv_icon != null) {
                         iv_icon.setBackgroundResource(R.mipmap.microphone);
                     }
-                    playTip(R.raw.tip_start_answer, null);
+                    if (curQaState == QAState.Questing || curQaState == QAState.ReQuesting) {
+                        playTip(R.raw.tip_start_answer, null);
+                        if (curQaState == QAState.Questing) {
+                            curQaState = QAState.Answering;
+                        } else if (curQaState == QAState.ReQuesting) {
+                            curQaState = QAState.ReAnswering;
+                        }
+                        startRecordQA();
+                    } else {
+                        cancelQA();
+                    }
+
                 }
             });
         }
@@ -475,22 +508,22 @@ public class BookActivity extends BaseActivity {
         }
     }
 
-    private void startRecordQA(){
+    private void startRecordQA() {
         client.startQAWithRecorder(new TuringOSClientListener() {
             @Override
             public void onResult(int code, String result, ResponBean responBean, String asrResult) {
-                if(code == 200){
-                    if(responBean.getNlpResponse() != null && responBean.getNlpResponse().getIntent() != null){
-                        if(responBean.getNlpResponse().getIntent().getOperateState() == 3000){
+                if (code == 200) {
+                    if (responBean.getNlpResponse() != null && responBean.getNlpResponse().getIntent() != null) {
+                        if (responBean.getNlpResponse().getIntent().getOperateState() == 3000) {
                             List<ResponBean.NlpResponseBean.ResultsBean> resultsBean =
                                     responBean.getNlpResponse().getResults();
                             if (curQaState == QAState.Answering) {
                                 startQA(resultsBean, QAState.ReQuesting, asrResult);
                             }
-                        }else if (responBean.getNlpResponse().getIntent().getOperateState() == 3100) {
+                        } else if (responBean.getNlpResponse().getIntent().getOperateState() == 3100) {
                             ResponBean.NlpResponseBean.IntentBean.ParametersBean parametersBean =
                                     responBean.getNlpResponse().getIntent().getParameters();
-                            if(parametersBean != null){
+                            if (parametersBean != null) {
                                 boolean success = parametersBean.isSuccess();
                                 List<ResponBean.NlpResponseBean.ResultsBean> resultsBean =
                                         responBean.getNlpResponse().getResults();
@@ -498,15 +531,15 @@ public class BookActivity extends BaseActivity {
                                     if (success) {
                                         startQA(resultsBean, QAState.AnswerCorrect, asrResult);
                                     } else {
-                                        startQA(resultsBean,  QAState.AnswerWrong, asrResult);
+                                        startQA(resultsBean, QAState.AnswerWrong, asrResult);
                                     }
                                 }
                             }
                         }
                     }
-                }else{
+                } else {
                     Log.e(TAG, "code : " + code + " result: " + result);
-                    if(curQaState == QAState.None) return;
+                    if (curQaState == QAState.None) return;
                     playTip(R.raw.tip_answer_wrong, null);
                     cancelQA();
                 }
@@ -514,9 +547,9 @@ public class BookActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String result) {
-                if(curQaState == QAState.None) return;
-                playTip(R.raw.tip_answer_wrong, null);
                 Log.e(TAG, "code : " + code + " result: " + result);
+                if (curQaState == QAState.None) return;
+                playTip(R.raw.tip_answer_wrong, null);
                 cancelQA();
             }
         });
@@ -552,7 +585,7 @@ public class BookActivity extends BaseActivity {
 
                 @Override
                 public void onComplete() {
-                    startRecordQA();
+                    Log.d(TAG, "onComplete");
                 }
 
                 @Override
@@ -579,15 +612,15 @@ public class BookActivity extends BaseActivity {
     private void startQA(List<ResponBean.NlpResponseBean.ResultsBean> resultsBeans, QAState qaState, String asr) {
         List<String> questions = new ArrayList<>();
         List<String> questionsText = new ArrayList<>();
-        for(int i = 0; i < resultsBeans.size(); i++){
-            if(resultsBeans.get(i).getValues() != null && resultsBeans.get(i).getValues().getTtsUrl() != null){
+        for (int i = 0; i < resultsBeans.size(); i++) {
+            if (resultsBeans.get(i).getValues() != null && resultsBeans.get(i).getValues().getTtsUrl() != null) {
                 questions.add(resultsBeans.get(i).getValues().getTtsUrl().get(0));
                 questionsText.add(resultsBeans.get(i).getValues().getText());
             }
         }
-        if(questions.size() > 0){
+        if (questions.size() > 0) {
             handleQA(questionsText, questions, qaState, asr);
-        }else{
+        } else {
             Log.e(TAG, "No Qa data !");
         }
 
@@ -625,7 +658,7 @@ public class BookActivity extends BaseActivity {
                 case ReQuesting:
                 case AnswerWrong:
                 case AnswerCorrect:
-                    if(ttsPlayerPool != null){
+                    if (ttsPlayerPool != null) {
                         ttsPlayerPool.stop();
                     }
                     break;

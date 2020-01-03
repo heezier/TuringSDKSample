@@ -2,6 +2,7 @@ package com.turing.sample.app;
 
 import android.app.Application;
 
+
 /**
  * created by yihuapeng
  * on 2019/11/7

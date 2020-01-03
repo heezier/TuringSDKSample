@@ -139,7 +139,7 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onRecorderStart() {
-                Log.e("yhp", "==============");
+                Log.d(TAG, "=========onRecorderStart=====");
                 addSendMsg();
             }
 
@@ -166,19 +166,16 @@ public class ChatActivity extends BaseActivity {
                         if (code == TuringErrorCode.WEBSOCKET_200) {
                             handlerResult(responBean);
                         } else {
+                            if(code == 210 || code == 220 || code == 300) return;
                             if (code == 5002) {
-                                int index = 0;
-                                for (int i = msgList.size() - 1; i >= 0; i--) {
-                                    if (msgList.get(i).getType() == Msg.SENT) {
-                                        index = i;
-                                        break;
-                                    }
+                                Msg msg = new Msg("你没有说话", Msg.SENT);
+                                updatePreSendMsg(msg);
+                            }else{
+                                if(responBean != null){
+                                    Msg msg = new Msg(responBean.getMessage(), Msg.SENT);
+                                    updatePreSendMsg(msg);
                                 }
-                                if (msgList.size() > 0) {
-                                    msgList.remove(index);
-                                }
-                                msgList.add(new Msg("你没有说话", Msg.SENT));
-                                adapter.updateList(msgList);
+
                             }
                         }
                     }
@@ -215,6 +212,20 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
+    private void updatePreSendMsg(Msg msg){
+        int index = 0;
+        for (int i = msgList.size() - 1; i >= 0; i--) {
+            if (msgList.get(i).getType() == Msg.SENT) {
+                index = i;
+                break;
+            }
+        }
+        if (msgList.size() > 0) {
+            msgList.remove(index);
+        }
+        msgList.add(msg);
+        adapter.updateList(msgList);
+    }
     private void startTextChat(String text) {
         long time = System.currentTimeMillis();
         client.actionChat(text, new TuringOSClientListener() {
@@ -246,22 +257,13 @@ public class ChatActivity extends BaseActivity {
     private void handlerResult(ResponBean responBean) {
         if (responBean != null && responBean.getAsrResponse() != null) {
             String asrResult = responBean.getAsrResponse().getValue();
-            int index = 0;
-            for (int i = msgList.size() - 1; i >= 0; i--) {
-                if (msgList.get(i).getType() == Msg.SENT) {
-                    index = i;
-                    break;
-                }
-            }
-            if (msgList.size() > 0) {
-                msgList.remove(index);
-            }
             if (!TextUtils.isEmpty(asrResult)) {
-                msgList.add(new Msg(asrResult, Msg.SENT));
+                Msg msg = new Msg(asrResult, Msg.SENT);
+                updatePreSendMsg(msg);
             } else {
-                msgList.add(new Msg("你没有说话", Msg.SENT));
+                Msg msg = new Msg("你没有说话", Msg.SENT);
+                updatePreSendMsg(msg);
             }
-            adapter.updateList(msgList);
         }
         if (responBean != null && responBean.getNlpResponse() != null
                 && responBean.getNlpResponse().getResults() != null) {

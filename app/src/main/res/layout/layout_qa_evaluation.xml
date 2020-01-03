@@ -9,7 +9,6 @@
         android:id="@+id/tv_questing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:singleLine="true"
         android:gravity="center"
         android:textColor="@android:color/black"
         android:textSize="16sp"
@@ -20,8 +19,7 @@
         android:layout_height="40dp"
         android:singleLine="true"
         android:gravity="center"
-        android:textSize="16sp"
-        android:text="@string/Chat" />
+        android:textSize="16sp" />
 
     <ImageView
         android:id="@+id/iv_icon"
