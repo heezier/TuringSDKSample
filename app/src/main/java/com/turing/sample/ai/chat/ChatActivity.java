@@ -19,6 +19,7 @@ import com.turing.os.client.TuringOSClientListener;
 import com.turing.os.init.UserData;
 import com.turing.os.log.TuringErrorCode;
 import com.turing.os.player.TtsPlayerPool;
+import com.turing.os.request.bean.AsrRequestConfig;
 import com.turing.os.request.bean.ResponBean;
 import com.turing.sample.R;
 import com.turing.sample.app.JsonViewActivity;
@@ -134,18 +135,27 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void startRecordChat() {
-        client.startChatWithRecord(enableTts, new TuringOSClientAsrListener() {
-
+        addSendMsg();
+        AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
+        builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
+        builder.asrFormatEnum(AsrRequestConfig.PCM);
+        builder.asrRateEnum(AsrRequestConfig.RATE_16000);
+        builder.intermediateResult(true);
+        builder.enablePunctuation(false);
+        builder.enableVoiceDetection(false);
+        builder.maxEndSilence(2000);
+        builder.channel(AsrRequestConfig.CHANNEL_IN_MONO);
+        AsrRequestConfig asrRequestConfig = builder.build();
+        client.startChatWithRecord(enableTts, asrRequestConfig, null, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
                 Log.d(TAG, "=========onRecorderStart=====");
-                addSendMsg();
             }
 
             @Override
             public void onStop() {
-
+                Log.e(TAG, "=========onStop=====");
             }
 
             @Override
@@ -166,7 +176,6 @@ public class ChatActivity extends BaseActivity {
                         if (code == TuringErrorCode.WEBSOCKET_200) {
                             handlerResult(responBean);
                         } else {
-                            if(code == 210 || code == 220 || code == 300) return;
                             if (code == 5002) {
                                 Msg msg = new Msg("你没有说话", Msg.SENT);
                                 updatePreSendMsg(msg);
@@ -200,11 +209,16 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
-                Log.e(TAG, "code: " + code + " msg : " + msg);
+                Log.e(TAG, "onError code: " + code + " msg : " + msg);
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
                         tvTimer.setVisibility(View.GONE);
+                        resultList.add(msg);
+                        resultAdapter.updateList(resultList);
+                        resultRecyclerView.smoothScrollToPosition(resultList.size() - 1);
+                        Msg msgsend = new Msg(msg, Msg.SENT);
+                        updatePreSendMsg(msgsend);
                     }
                 });
 
@@ -238,6 +252,7 @@ public class ChatActivity extends BaseActivity {
                     public void run() {
                         resultList.add(result);
                         resultAdapter.updateList(resultList);
+                        resultRecyclerView.smoothScrollToPosition(resultList.size() - 1);
                         handlerResult(responBean);
                     }
                 });
@@ -245,7 +260,18 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
-                Log.e(TAG, "code: " + code + " msg: " + msg);
+                mUIHandler.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e(TAG, "onError code: " + code + " msg: " + msg);
+                        resultList.add(msg);
+                        resultAdapter.updateList(resultList);
+                        resultRecyclerView.smoothScrollToPosition(resultList.size() - 1);
+                        Msg msgsend = new Msg(msg, Msg.SENT);
+                        updatePreSendMsg(msgsend);
+                    }
+                });
+
             }
         });
         msgList.add(new Msg(text, Msg.SENT));
@@ -290,5 +316,13 @@ public class ChatActivity extends BaseActivity {
         TtsPlayerPool ttsPlayerPool = TtsPlayerPool.create(1);
         ttsPlayerPool.addPlayUrl(url);
         ttsPlayerPool.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(client != null){
+            client.release();
+        }
     }
 }

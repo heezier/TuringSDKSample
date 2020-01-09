@@ -26,8 +26,10 @@
 
 
     <string name="asr_withrecord">内置录音</string>
+    <string name="asr_streaming">流式输入</string>
     <string name="asr_streaming_pcm">PCM流输入</string>
     <string name="asr_streaming_opus">OPUS流输入</string>
+    <string name="asr_streaming_speex">Speex流输入</string>
 
     <string name="chat_send">发送</string>
     <string name="click_chat_start">按住讲话</string>

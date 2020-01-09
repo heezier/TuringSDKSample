@@ -3,6 +3,8 @@ package com.turing.sample.app;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.turing.sample.R;
 import com.turing.sample.app.base.BaseActivity;
 import com.yuyh.jsonviewer.library.JsonRecyclerView;
@@ -26,7 +28,16 @@ public class JsonViewActivity extends BaseActivity {
         mRecyclewView.setTextSize(14);
         String json = getIntent().getStringExtra("json");
         if(!TextUtils.isEmpty(json)){
-            mRecyclewView.bindJson(json);
+            try {
+                Gson gson = new Gson();
+                JsonObject obj = gson.fromJson(json, JsonObject.class);
+                mRecyclewView.bindJson(json);
+            }catch (Exception e){
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("infor", json);
+                mRecyclewView.bindJson(jsonObject.toString());
+            }
+
         }
     }
 }

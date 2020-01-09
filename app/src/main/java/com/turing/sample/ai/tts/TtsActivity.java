@@ -32,7 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class TtsActivity extends BaseActivity {
-    private final static String TAG = "ChatActivity";
+    private final static String TAG = "TtsActivity";
     @BindView(R.id.et_input)
     EditText etInput;
     @BindView(R.id.btn_start_nlp)

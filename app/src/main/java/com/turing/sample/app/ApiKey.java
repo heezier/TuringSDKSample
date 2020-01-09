@@ -3,10 +3,7 @@ package com.turing.sample.app;
 import com.turing.os.init.UserData;
 import com.turing.sample.app.base.BaseActivity;
 
-/**
- * @Author yihuapeng
- * @Date 2019/12/27 14:52
- **/
+
 public class ApiKey {
     private int type;
     private String apikey;
@@ -22,7 +19,8 @@ public class ApiKey {
 
     private final static String PRO_KEY = "";
     private final static String PRO_SECERT = "";
-    public ApiKey(int type) {
+
+    public ApiKey(@UserData.ServerChannel int type) {
         this.type = type;
     }
 

@@ -20,7 +20,6 @@ import com.turing.os.request.bean.AsrRequestConfig;
 import com.turing.os.request.bean.ResponBean;
 import com.turing.os.voiceprocessor.codec.BytesTransform;
 import com.turing.sample.R;
-import com.turing.sample.ai.chat.ResultAdapter;
 import com.turing.sample.app.JsonViewActivity;
 import com.turing.sample.app.base.BaseActivity;
 
@@ -57,7 +56,8 @@ public class AsrActivity extends BaseActivity {
 
     private final static int MODE_PCM = 0;
     private final static int MODE_RECORD = 1;
-    private final static int MODE_CODE = 2;
+    private final static int MODE_CODE_OPUS = 2;
+    private final static int MODE_CODE_SPEEX = 4;
     private final static int MODE_NONE = 3;
     @BindView(R.id.btn_stop_pcm)
     Button btnStopPcm;
@@ -67,6 +67,10 @@ public class AsrActivity extends BaseActivity {
     RecyclerView resultRecycleview;
     @BindView(R.id.tv_result)
     TextView tvResult;
+    @BindView(R.id.btn_speex_start)
+    Button btnSpeexStart;
+    @BindView(R.id.btn_speex_stop)
+    Button btnSpeexStop;
 
     private List<AsrResult> resultList = new ArrayList<>();
     private AsrResultAdapter resultAdapter;
@@ -105,12 +109,12 @@ public class AsrActivity extends BaseActivity {
         });
     }
 
-    private void startEncodeStream() {
+    private void startEncodeStream(final @AsrRequestConfig.AsrFormatEnum  int type) {
         AsrRequestConfig.Builder builder = new AsrRequestConfig.Builder();
         builder.asrLanguageEnum(AsrRequestConfig.CHINESE);
         //必须与传入可支持的格式对应，比如你将要传入opus格式，则该参数必须设置为OPUS
-        builder.asrFormatEnum(AsrRequestConfig.OPUS);
-        builder.asrSrcFormatEnum(AsrRequestConfig.OPUS);
+        builder.asrFormatEnum(type);
+        builder.asrSrcFormatEnum(type);
         builder.asrRateEnum(AsrRequestConfig.RATE_16000);
         builder.enablePunctuation(false);
         builder.maxEndSilence(3000);
@@ -121,7 +125,8 @@ public class AsrActivity extends BaseActivity {
 
         AsrRequestConfig asrRequestConfig = builder.build();
         turingOSClient = TuringOSClient.getInstance(this, userData);
-        turingOSClient.initAsrStream(asrRequestConfig, new TuringOSClientAsrListener() {
+        // turingOSClient.initAsrStream为ASR模式  turingOSClient.initChatStream为聊天模式
+        turingOSClient.initChatStream(true, asrRequestConfig, null, new TuringOSClientAsrListener() {
 
             @Override
             public void onRecorderStart() {
@@ -144,7 +149,7 @@ public class AsrActivity extends BaseActivity {
             @Override
             public void onStreamOpen() {
                 isEncodeStop = false;
-                startStreamEncodeInput();
+                startStreamEncodeInput(type);
             }
 
 
@@ -165,17 +170,23 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
-                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
+                Log.e(TAG, "onError  code: " + code + "  msg:" + msg);
                 isEncodeStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
+                        updateResult(code, msg, null);
                         updateUI(MODE_NONE);
                     }
                 });
             }
         });
-        updateUI(MODE_CODE);
+        if(type == AsrRequestConfig.OPUS){
+            updateUI(MODE_CODE_OPUS);
+        }else if(type == AsrRequestConfig.SPEEX){
+            updateUI(MODE_CODE_SPEEX);
+        }
+
     }
 
     private void startPCMStream() {
@@ -204,7 +215,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onStop() {
-                Log.e(TAG, "onStop");
+                Log.e(TAG, " =========onStop=====");
                 isPcmStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
@@ -239,11 +250,12 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
-                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
+                Log.e(TAG, "onError  code: " + code + "  msg:" + msg);
                 isPcmStop = true;
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
+                        updateResult(code, msg, null);
                         updateUI(MODE_NONE);
                     }
                 });
@@ -254,7 +266,6 @@ public class AsrActivity extends BaseActivity {
     }
 
     private void startInnerRecord() {
-
         turingOSClient = TuringOSClient.getInstance(this, userData);
         turingOSClient.startAsrWithRecorder(true, new TuringOSClientAsrListener() {
             @Override
@@ -270,7 +281,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onStop() {
-                Log.e(TAG, "onStop");
+                Log.e(TAG, " =========onStop=====");
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -302,7 +313,7 @@ public class AsrActivity extends BaseActivity {
 
             @Override
             public void onError(int code, String msg) {
-                Log.e(TAG, "onError  code: " + code  + "  msg:" + msg);
+                Log.e(TAG, "onError  code: " + code + "  msg:" + msg);
                 mUIHandler.postRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -321,13 +332,25 @@ public class AsrActivity extends BaseActivity {
 
     private void updateUI(int mode) {
         switch (mode) {
-            case MODE_CODE:
+            case MODE_CODE_OPUS:
                 btnStart.setEnabled(false);
                 btnStop.setEnabled(false);
                 btnStreamStart.setEnabled(false);
                 btnCodeStart.setEnabled(false);
                 btnStopOpus.setEnabled(true);
                 btnStopPcm.setEnabled(false);
+                btnSpeexStart.setEnabled(false);
+                btnSpeexStop.setEnabled(false);
+                break;
+            case MODE_CODE_SPEEX:
+                btnStart.setEnabled(false);
+                btnStop.setEnabled(false);
+                btnStreamStart.setEnabled(false);
+                btnCodeStart.setEnabled(false);
+                btnStopOpus.setEnabled(false);
+                btnStopPcm.setEnabled(false);
+                btnSpeexStart.setEnabled(false);
+                btnSpeexStop.setEnabled(true);
                 break;
             case MODE_PCM:
                 btnStart.setEnabled(false);
@@ -336,6 +359,8 @@ public class AsrActivity extends BaseActivity {
                 btnCodeStart.setEnabled(false);
                 btnStopOpus.setEnabled(false);
                 btnStopPcm.setEnabled(true);
+                btnSpeexStart.setEnabled(false);
+                btnSpeexStop.setEnabled(false);
                 break;
             case MODE_RECORD:
                 btnStart.setEnabled(false);
@@ -344,6 +369,8 @@ public class AsrActivity extends BaseActivity {
                 btnCodeStart.setEnabled(false);
                 btnStopOpus.setEnabled(false);
                 btnStopPcm.setEnabled(false);
+                btnSpeexStart.setEnabled(false);
+                btnSpeexStop.setEnabled(false);
                 break;
             case MODE_NONE:
                 btnStart.setEnabled(true);
@@ -352,13 +379,15 @@ public class AsrActivity extends BaseActivity {
                 btnCodeStart.setEnabled(true);
                 btnStopOpus.setEnabled(false);
                 btnStopPcm.setEnabled(false);
-
+                btnSpeexStart.setEnabled(true);
+                btnSpeexStop.setEnabled(false);
                 break;
         }
     }
 
     @OnClick({R.id.btn_start, R.id.btn_stop, R.id.btn_stream_start,
-            R.id.btn_code_start, R.id.btn_stop_pcm, R.id.btn_stop_opus})
+            R.id.btn_code_start, R.id.btn_stop_pcm, R.id.btn_stop_opus,
+            R.id.btn_speex_start, R.id.btn_speex_stop})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_start:
@@ -371,7 +400,7 @@ public class AsrActivity extends BaseActivity {
                 startPCMStream();
                 break;
             case R.id.btn_code_start:
-                startEncodeStream();
+                startEncodeStream(AsrRequestConfig.OPUS);
                 break;
             case R.id.btn_stop_pcm:
                 isPcmStop = true;
@@ -379,11 +408,15 @@ public class AsrActivity extends BaseActivity {
                     turingOSClient.stopAsr();
                 }
                 break;
+            case R.id.btn_speex_stop:
             case R.id.btn_stop_opus:
                 isEncodeStop = true;
                 if (turingOSClient != null) {
                     turingOSClient.stopAsr();
                 }
+                break;
+            case R.id.btn_speex_start:
+                startEncodeStream(AsrRequestConfig.SPEEX);
                 break;
         }
     }
@@ -430,10 +463,10 @@ public class AsrActivity extends BaseActivity {
             }
             try {
                 InputStream inputStream = getAssets().open("weather.pcm");
-                byte[] buffer = new byte[OpusHelper.getByteSizePerFrame(FRAME_SIZE, CHANNELS)];
                 int bufferSize = OpusHelper.getByteSizePerFrame(FRAME_SIZE, CHANNELS);
                 Log.e(TAG, FRAME_SIZE + "length" + bufferSize);
                 while (!isEncodeStop) {
+                    byte[] buffer = new byte[bufferSize];
                     int length = inputStream.read(buffer);
                     if (length == -1) {
                         turingOSClient.stopAsr();
@@ -449,6 +482,28 @@ public class AsrActivity extends BaseActivity {
             }
         }
     };
+
+    private Runnable encodeSpeexRun = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                InputStream inputStream = getAssets().open("father.spx");
+
+                while (!isEncodeStop) {
+                    byte[] buffer = new byte[1280];
+                    int length = inputStream.read(buffer);
+                    if (length == -1) {
+                        turingOSClient.stopAsr();
+                        break;
+                    }
+                    turingOSClient.sendAudio(buffer, buffer.length);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
 
     private void updateResult(int code, String result, ResponBean responBean) {
         if (code == 200) {
@@ -473,8 +528,12 @@ public class AsrActivity extends BaseActivity {
 
     }
 
-    private void startStreamEncodeInput() {
-        new Thread(encodeRun).start();
+    private void startStreamEncodeInput(int type) {
+        if(type == AsrRequestConfig.OPUS){
+            new Thread(encodeRun).start();
+        }else if(type == AsrRequestConfig.SPEEX){
+            new Thread(encodeSpeexRun).start();
+        }
     }
 
     @Override

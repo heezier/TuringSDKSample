@@ -207,7 +207,7 @@ public class CameraVideo implements SurfaceHolder.Callback, Camera.PreviewCallba
 			mParameters.setPreviewSize(width, height);
 			List<Camera.Size> preSize = mParameters.getSupportedPreviewSizes();
 			for(int i = 0; i < preSize.size(); i++){
-				Log.e("size", "width" + preSize.get(i).width + "height" + preSize.get(i).height);
+				Log.i("size", "width" + preSize.get(i).width + "height" + preSize.get(i).height);
 			}
 			mParameters.setPictureSize(width, height);
 			Log.e(TAG, "width: " + width + ", height: " + height);
